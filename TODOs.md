@@ -1,0 +1,5 @@
+- Builder pattern for structs with compile time invariant checks
+- Signing
+- Store
+- CLI
+- Feature based compilation
