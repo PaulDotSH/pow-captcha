@@ -1,0 +1,19 @@
+[package]
+name = "pow-captcha"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bcrypt = "0.17.0"
+rand = "0.9.0"
+
+# We need some serialization crate for store and encoding for the cli
+
+[features]
+default = []
+store = []
+signing = []
+
+[[bin]]
+name = "pow-captcha-cli"
+path = "src/solver/main.rs"

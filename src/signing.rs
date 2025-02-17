@@ -1,0 +1,10 @@
+/*
+    Workflow
+
+    Init that creates a public key
+    Init that uses an existing public key
+
+    Sign
+
+    Validate
+*/
