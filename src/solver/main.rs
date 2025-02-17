@@ -1,7 +1,7 @@
 use std::env;
 
 use base64::prelude::*;
-use pow_captcha::common::{CaptchaAnswer, CaptchaClientInfo, CaptchaServerInfo, CaptchaType};
+use pow_captcha::common::{CaptchaClientInfo, CaptchaServerInfo, CaptchaType};
 use rayon::prelude::*;
 
 fn main() {
@@ -44,13 +44,30 @@ pub fn solve_exact_captcha(info: CaptchaClientInfo) {
     println!("No nonce found");
 }
 
-pub fn solve_prefix_captcha(info: CaptchaClientInfo) {
-    
-} 
 
-// Workflow
-/*
-    1. Take input variables (type of captcha, salt, hash)
-    2. match based on it and run algo
-    3. print output
-*/
+pub fn solve_prefix_captcha(info: CaptchaClientInfo) {
+    println!("Generating from 0 to {}", 100_000);
+    (0..=100_000).into_par_iter().for_each(|nonce| {
+        let to_hash = format!("{}{}", info.salt, nonce);
+        let hash = bcrypt::hash_with_salt(&to_hash, info.cost,
+            info.salt.as_bytes()[0..16].try_into().expect("Cannot into")).expect("Cannot hash").to_string();
+        
+        if hash.to_string().as_bytes().iter().take(info.size).zip(info.hash.as_bytes().iter().take(info.size)).all(|(a, b)| a == b) {
+            println!("Nonce found {}", nonce);
+
+            println!("Verifying...");
+
+            let info = CaptchaServerInfo {
+                client_info: CaptchaClientInfo { tokensignature: info.tokensignature.clone(), hash: info.hash.clone(), salt: info.salt.clone(), captcha_type: info.captcha_type, size: info.size, cost: info.cost },
+                nonce: nonce as u64,
+            };
+            
+            let encoded_info = bitcode::encode(&info);
+
+            let encoded_b64 = BASE64_STANDARD.encode(encoded_info);
+            println!("{}", encoded_b64);
+            std::process::exit(0);
+        }
+    });
+    println!("No nonce found");
+}
