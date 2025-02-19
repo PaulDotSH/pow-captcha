@@ -1,6 +1,14 @@
 [package]
 name = "pow-captcha"
 version = "0.1.0"
+authors = ["Abrudan Paul - Andrei <paulandreiabrudan@protonmail.com>"]
+description = "Proof of Work captcha using bcrypt with a CLI solver included"
+homepage = "https://github.com/PaulDotSH/pow-captcha"
+repository = "https://github.com/PaulDotSH/pow-captcha"
+keywords = ["captcha", "bcrypt"]
+categories = ["Web programming", "Captcha"]
+license = "GPL-3.0"
+license-file = "LICENSE"
 edition = "2021"
 
 [dependencies]

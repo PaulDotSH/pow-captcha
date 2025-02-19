@@ -18,13 +18,12 @@ fn main() {
         CaptchaType::Exact => solve_exact_captcha(captcha_info),
         CaptchaType::Prefix => solve_prefix_captcha(captcha_info),
     }
-
 }
 
 pub fn solve_exact_captcha(info: CaptchaClientInfo) {
     println!("Generating from 0 to {}", info.size);
 
-    (0..=info.size).into_par_iter().for_each(|nonce| {
+    (0..=info.size).into_par_iter().for_each(|nonce: usize| {
         let to_hash = format!("{}{}", info.salt, nonce);
         
         if bcrypt::verify(&to_hash, &info.hash).unwrap() {
@@ -43,7 +42,6 @@ pub fn solve_exact_captcha(info: CaptchaClientInfo) {
     });
     println!("No nonce found");
 }
-
 
 pub fn solve_prefix_captcha(info: CaptchaClientInfo) {
     println!("Generating from 0 to {}", 100_000);
