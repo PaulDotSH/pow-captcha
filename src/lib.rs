@@ -1,8 +1,5 @@
 pub mod pow;
 
-#[cfg(feature = "signing")]
-pub mod signing;
-
 #[cfg(feature = "store")]
 pub mod store;
 

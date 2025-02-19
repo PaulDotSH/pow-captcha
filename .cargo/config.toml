@@ -1,5 +1,5 @@
 [build]
 rustflags = [
-#    "--cfg", "feature=\"store\"",
-#    "--cfg", "feature=\"store-redis\"",
+    "--cfg", "feature=\"store\"",
+    "--cfg", "feature=\"store-redis\"",
 ]

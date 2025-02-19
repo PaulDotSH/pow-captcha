@@ -34,7 +34,6 @@ pub struct CaptchaClientInfo {
 pub enum TokenSignature{
     Neither,
     Token(String),
-    TokenSignature((String, String))
 }
 
 #[derive(Debug, Eq, PartialEq)]

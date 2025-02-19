@@ -6,20 +6,21 @@ pub enum StoreResult<T> {
     Ok(T),
     #[cfg(feature = "store-redis")]
     RedisError(::redis::RedisError),
+    GenericError,
 }
 
 #[cfg(feature = "async")]
 #[async_trait::async_trait]
 pub trait Store {
-    async fn get(&mut self, key: String) -> StoreResult<Vec<u8>>;
-    async fn set(&mut self, key: String, value: Vec<u8>) -> StoreResult<()>;
+    async fn get(&mut self, key: &str) -> StoreResult<Vec<u8>>;
+    async fn set(&mut self, key: &str, value: Vec<u8>) -> StoreResult<()>;
 }
 
 
 #[cfg(not(feature = "async"))]
 pub trait Store {
-    fn get(&mut self, key: String) -> StoreResult<Vec<u8>>;
-    fn set(&mut self, key: String, value: Vec<u8>) -> StoreResult<()>;
+    fn get(&mut self, key: &str) -> StoreResult<Vec<u8>>;
+    fn set(&mut self, key: &str, value: Vec<u8>) -> StoreResult<()>;
 }
 
 /*

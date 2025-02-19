@@ -2,12 +2,13 @@ use bcrypt::BcryptError;
 use rand::{rng, Rng};
 use crate::common;
 use crate::common::{CaptchaAnswer, CaptchaClientInfo, CaptchaServerInfo};
-use crate::pow::common::generate_token;
+use crate::pow::common::*;
 use super::{CaptchaInput, PoWCommon};
 #[cfg(feature = "serialize")]
 use base64::{Engine, prelude::BASE64_STANDARD};
 #[cfg(feature = "serialize")]
 use super::DeserializeError;
+
 
 
 pub trait PoWImpl {
@@ -127,12 +128,21 @@ impl<T: crate::store::Store> crate::pow::PoW<T> for PoW<T> {
     }
 
     fn validate_captcha(&self, input: CaptchaInput) -> bool {
+        #[cfg(feature = "store")]
+        {
+            //     Verify parameters from storage
+        }
         PoWImpl::validate_captcha(self, input)
     }
 
     #[cfg(feature = "serialize")]
     fn generate_serialized_captcha(&self) -> Result<(String, CaptchaAnswer), BcryptError> {
-        PoWImpl::generate_serialized_captcha(self)
+        let captcha = PoWImpl::generate_serialized_captcha(self)?;
+        #[cfg(feature = "store")]
+        {
+        //     Store code here
+        }
+        Ok(captcha)
     }
 }
 

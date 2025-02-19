@@ -28,7 +28,6 @@ async = ["tokio", "async-trait", "redis/tokio-comp"]
 store-redis = ["store", "redis"]
 store-skytable = ["store"]
 store-postgres = ["store"]
-signing = ["store"]
 serialize = ["bitcode", "base64"]
 multithreading-cli = ["rayon"]
 

@@ -13,7 +13,10 @@ async fn async_test_connect_to_redis() {
         StoreResult::Ok(val) => {
             assert_eq!(val, vec);
         }
-        StoreResult::RedisError(e) => {
+        StoreResult::RedisError(_) => {
+            assert!(false)
+        }
+        StoreResult::GenericError => {
             assert!(false)
         }
     }
@@ -32,6 +35,9 @@ fn test_connect_to_redis() {
             assert_eq!(val, vec);
         }
         StoreResult::RedisError(e) => {
+            assert!(false)
+        }
+        StoreResult::GenericError => {
             assert!(false)
         }
     }
