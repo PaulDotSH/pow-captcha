@@ -24,8 +24,6 @@ pub trait PoW<T> {
     fn generate_captcha(&self) -> Result<CaptchaAnswer, BcryptError>;
     fn validate_captcha(&self, input: CaptchaInput) -> bool;
     #[cfg(feature = "serialize")]
-    fn deserialize_captcha_server_info(&self, string: &str) -> Result<CaptchaServerInfo, DeserializeError>;
-    #[cfg(feature = "serialize")]
     fn generate_serialized_captcha(&self) -> Result<(String, CaptchaAnswer), BcryptError>;
 }
 

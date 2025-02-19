@@ -25,7 +25,7 @@ async fn async_test_connect_to_redis() {
 fn test_connect_to_redis() {
     let mut store = store::redis::RedisStore::new("redis://127.0.0.1:6379/").unwrap();
     let vec = vec![1, 2, 3, 4, 5];
-    store.set("key".into(), vec.clone()).await;
+    store.set("key".into(), vec.clone());
     let val = store.get("key".into());
     match val {
         StoreResult::Ok(val) => {

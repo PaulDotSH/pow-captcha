@@ -40,11 +40,6 @@ pub trait PoWImpl {
     }
 
     #[cfg(feature = "serialize")]
-    fn deserialize_captcha_server_info(&self) -> Result<CaptchaServerInfo, DeserializeError> {
-        todo!()
-    }
-
-    #[cfg(feature = "serialize")]
     fn generate_serialized_captcha(&self) -> Result<(String, CaptchaAnswer), BcryptError> {
         use base64::Engine;
         use crate::common::{CaptchaClientInfo, CaptchaType, TokenSignature};
@@ -120,11 +115,6 @@ impl<T: crate::store::Store> crate::pow::PoW<T> for PoW<T> {
 
     fn validate_captcha(&self, input: CaptchaInput) -> bool {
         PoWImpl::validate_captcha(self, input)
-    }
-
-    #[cfg(feature = "serialize")]
-    fn deserialize_captcha_server_info(&self, string: &str) -> Result<CaptchaServerInfo, DeserializeError> {
-        PoWImpl::deserialize_captcha_server_info(self)
     }
 
     #[cfg(feature = "serialize")]

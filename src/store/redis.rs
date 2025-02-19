@@ -64,7 +64,7 @@ impl RedisStore {
 }
 #[cfg(not(feature = "async"))]
 impl Store for RedisStore {
-    fn get(&mut self, key: String) -> StoreResult<String> {
+    fn get(&mut self, key: String) -> StoreResult<Vec<u8>> {
         match self.connection.get::<String, Vec<u8>>(key) {
             Ok(s) => {
                 StoreResult::Ok(s)
@@ -76,7 +76,7 @@ impl Store for RedisStore {
     }
 
     fn set(&mut self, key: String, value: Vec<u8>) -> StoreResult<()> {
-        match self.connection.set(key, value) {
+        match self.connection.set::<String, Vec<u8>, ()>(key, value) {
             Ok(s) => {
                 StoreResult::Ok(s)
             }

@@ -18,7 +18,7 @@ pub trait Store {
 
 #[cfg(not(feature = "async"))]
 pub trait Store {
-    fn get(&mut self, key: String) -> StoreResult<String>;
+    fn get(&mut self, key: String) -> StoreResult<Vec<u8>>;
     fn set(&mut self, key: String, value: Vec<u8>) -> StoreResult<()>;
 }
 

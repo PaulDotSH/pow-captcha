@@ -7,7 +7,7 @@ pub struct CaptchaAnswer {
     pub salt: String,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg(feature = "serialize")]
 #[derive(bitcode::Encode, bitcode::Decode)]
 pub enum CaptchaType {
@@ -15,7 +15,7 @@ pub enum CaptchaType {
     Prefix,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg(feature = "serialize")]
 #[derive(bitcode::Encode, bitcode::Decode)]
 // Token and signature are always here since the client should be portable
@@ -28,7 +28,7 @@ pub struct CaptchaClientInfo {
     pub cost: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg(feature = "serialize")]
 #[derive(bitcode::Encode, bitcode::Decode)]
 pub enum TokenSignature{
@@ -37,7 +37,7 @@ pub enum TokenSignature{
     TokenSignature((String, String))
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 #[cfg(feature = "serialize")]
 #[derive(bitcode::Encode, bitcode::Decode)]
 pub struct CaptchaServerInfo {

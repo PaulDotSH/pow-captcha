@@ -1,11 +1,11 @@
-use base64::Engine;
-use base64::prelude::BASE64_STANDARD;
 use bcrypt::BcryptError;
 use rand::{rng, Rng};
 use crate::common;
 use crate::common::{CaptchaAnswer, CaptchaClientInfo, CaptchaServerInfo};
 use crate::pow::common::generate_token;
 use super::{CaptchaInput, PoWCommon};
+#[cfg(feature = "serialize")]
+use base64::{Engine, prelude::BASE64_STANDARD};
 #[cfg(feature = "serialize")]
 use super::DeserializeError;
 
@@ -65,28 +65,8 @@ pub trait PoWImpl {
 
         let encoded: Vec<u8> = bitcode::encode(&info);
 
-        Ok((base64::prelude::BASE64_STANDARD.encode(encoded), captcha))
+        Ok((BASE64_STANDARD.encode(encoded), captcha))
     }
-
-    #[cfg(feature = "serialize")]
-    fn deserialize_captcha_info(&self, string: &str) -> Result<CaptchaServerInfo, DeserializeError> {
-        let decoded_b64 = match BASE64_STANDARD.decode(string) {
-            Ok(decoded) => decoded,
-            Err(e) => {
-                return Err(DeserializeError::Base64Error(e));
-            }
-        };
-
-        let captcha_info: CaptchaServerInfo = match bitcode::decode::<CaptchaServerInfo>(&decoded_b64) {
-            Ok(decoded) => decoded,
-            Err(e) => {
-                return Err(DeserializeError::BitcodeError(e));
-            }
-        };
-
-        Ok(captcha_info)
-    }
-
 
     #[cfg(feature = "store")]
     fn common(&self) -> &PoWCommon;
@@ -118,6 +98,17 @@ impl<T: crate::store::Store> PoWImpl for PoW<T> {
     }
 }
 
+#[cfg(feature = "store")]
+#[cfg(not(feature = "async"))]
+impl<T: crate::store::Store> PoWImpl for PoW<T> {
+    fn common(&self) -> &PoWCommon {
+        &self.common
+    }
+    fn salt_size(&self) -> u16 {
+        self.salt_size
+    }
+}
+
 #[cfg(not(feature = "store"))]
 impl PoWImpl for PoW {
     fn common(&self) -> &PoWCommon {
@@ -132,15 +123,11 @@ impl PoWImpl for PoW {
 impl<T: crate::store::Store> crate::pow::PoW<T> for PoW<T> {
     fn generate_captcha(&self) -> Result<CaptchaAnswer, BcryptError> {
         let captcha = PoWImpl::generate_captcha(self)?;
+        Ok(captcha)
     }
 
     fn validate_captcha(&self, input: CaptchaInput) -> bool {
         PoWImpl::validate_captcha(self, input)
-    }
-
-    #[cfg(feature = "serialize")]
-    fn deserialize_captcha_server_info(&self, string: &str) -> Result<CaptchaServerInfo, DeserializeError> {
-        PoWImpl::deserialize_captcha_info(self, string)
     }
 
     #[cfg(feature = "serialize")]
