@@ -1,7 +1,10 @@
 use bcrypt::BcryptError;
 use rand::{rng, Rng};
-use crate::common::CaptchaAnswer;
+use crate::common::{CaptchaAnswer, CaptchaClientInfo, CaptchaServerInfo};
+use crate::pow::common::generate_token;
 use super::{CaptchaInput, PoWCommon};
+#[cfg(feature = "serialize")]
+use super::DeserializeError;
 
 pub trait PoWImpl {
     fn generate_captcha(&self) -> Result<CaptchaAnswer, BcryptError> {
@@ -35,7 +38,12 @@ pub trait PoWImpl {
             .zip(input.hash.as_bytes().iter().take(self.match_size()))
             .all(|(a, b)| a == b)
     }
-    
+
+    #[cfg(feature = "serialize")]
+    fn deserialize_captcha_server_info(&self) -> Result<CaptchaServerInfo, DeserializeError> {
+        todo!()
+    }
+
     #[cfg(feature = "serialize")]
     fn generate_serialized_captcha(&self) -> Result<(String, CaptchaAnswer), BcryptError> {
         use base64::Engine;
@@ -46,12 +54,12 @@ pub trait PoWImpl {
 
         #[cfg(feature = "store")]
         {
-            ts = TokenSignature::Token();
+            ts = TokenSignature::Token(generate_token(self.common().token_size));
         }
 
         #[cfg(feature = "signing")]
         {
-            ts = TokenSignature::Signature();
+            ts = TokenSignature::TokenSignature((generate_token(self.common().token_size), String::from("signature todo")));
         }
 
         let info = CaptchaClientInfo {
@@ -60,7 +68,7 @@ pub trait PoWImpl {
             captcha_type: CaptchaType::Prefix,
             size: self.match_size(),
             cost: self.common().cost,
-            tokensignature: ts,
+            token_signature: ts,
         };
 
         let encoded: Vec<u8> = bitcode::encode(&info);
@@ -115,9 +123,15 @@ impl<T: crate::store::Store> crate::pow::PoW<T> for PoW<T> {
     }
 
     #[cfg(feature = "serialize")]
+    fn deserialize_captcha_server_info(&self, string: &str) -> Result<CaptchaServerInfo, DeserializeError> {
+        PoWImpl::deserialize_captcha_server_info(self)
+    }
+
+    #[cfg(feature = "serialize")]
     fn generate_serialized_captcha(&self) -> Result<(String, CaptchaAnswer), BcryptError> {
         PoWImpl::generate_serialized_captcha(self)
     }
+
 }
 
 #[cfg(not(feature = "store"))]

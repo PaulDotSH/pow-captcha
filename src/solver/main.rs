@@ -6,7 +6,7 @@ use rayon::prelude::*;
 
 fn main() {
     let Some(b64encoded) = env::args().nth(1) else {
-        eprintln!("Usage: {} captcha_str", env::args().nth(0).unwrap());
+        eprintln!("Usage: {} captcha_str", env::args().next().unwrap());
         return;
     };
 
@@ -29,7 +29,7 @@ pub fn solve_exact_captcha(info: CaptchaClientInfo) {
         if bcrypt::verify(&to_hash, &info.hash).unwrap() {
             println!("Nonce found {}", nonce);
             let info = CaptchaServerInfo {
-                client_info: CaptchaClientInfo { tokensignature: info.tokensignature.clone(), hash: info.hash.clone(), salt: info.salt.clone(), captcha_type: info.captcha_type, size: info.size, cost: info.cost },
+                client_info: CaptchaClientInfo { token_signature: info.token_signature.clone(), hash: info.hash.clone(), salt: info.salt.clone(), captcha_type: info.captcha_type, size: info.size, cost: info.cost },
                 nonce: nonce as u64,
             };
             
@@ -56,7 +56,7 @@ pub fn solve_prefix_captcha(info: CaptchaClientInfo) {
             println!("Verifying...");
 
             let info = CaptchaServerInfo {
-                client_info: CaptchaClientInfo { tokensignature: info.tokensignature.clone(), hash: info.hash.clone(), salt: info.salt.clone(), captcha_type: info.captcha_type, size: info.size, cost: info.cost },
+                client_info: CaptchaClientInfo { token_signature: info.token_signature.clone(), hash: info.hash.clone(), salt: info.salt.clone(), captcha_type: info.captcha_type, size: info.size, cost: info.cost },
                 nonce: nonce as u64,
             };
             

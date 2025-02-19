@@ -18,8 +18,10 @@ mod tests {
 
     use super::*;
 
+    #[cfg(not(feature = "store"))]
     #[test]
     fn test_exact_captcha() {
+        #[cfg(not(feature = "store"))]
         let instance = pow::exact::PoW {
             salt_size: 32,
             common: PoWCommon {
@@ -27,6 +29,7 @@ mod tests {
                 challenge_size: 350,
             },
         };
+
         let (encoded, captcha) = instance.generate_serialized_captcha().unwrap();
         println!("{:?}", encoded);
         println!("{:?}", captcha);
@@ -34,6 +37,7 @@ mod tests {
         assert!(instance.validate_captcha(CaptchaInput{ salt: captcha.salt, hash: captcha.hash, nonce: captcha.nonce }))
     }
 
+    #[cfg(not(feature = "store"))]
     #[test]
     fn test_prefix_captcha_cli() {
         let instance = pow::exact::PoW {
@@ -68,6 +72,7 @@ mod tests {
             nonce: captcha_info.nonce }))
     }
 
+    #[cfg(not(feature = "store"))]
     #[test]
     fn test_exact_captcha_cli() {
         let instance = pow::exact::PoW {
@@ -102,6 +107,7 @@ mod tests {
             nonce: captcha_info.nonce }))
     }
 
+    #[cfg(not(feature = "store"))]
     #[test]
     fn test_prefix_captcha_fail() {
         let instance = pow::prefix::PoW {

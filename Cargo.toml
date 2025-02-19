@@ -6,7 +6,7 @@ description = "Proof of Work captcha using bcrypt with a CLI solver included"
 homepage = "https://github.com/PaulDotSH/pow-captcha"
 repository = "https://github.com/PaulDotSH/pow-captcha"
 keywords = ["captcha", "bcrypt"]
-categories = ["Web programming", "Captcha"]
+categories = ["web-programming", "web-programming::http-server"]
 license = "GPL-3.0"
 license-file = "LICENSE"
 edition = "2021"
@@ -17,15 +17,23 @@ base64 = { version = "0.22.1", optional = true }
 bitcode = { version = "0.6.4", optional = true }
 rand = "0.9.0"
 rayon = { version = "1.10.0", optional = true }
-
-# We need some serialization crate for store and encoding for the cli
+redis = { version = "0.29.0", optional = true }
+tokio = { version = "1.43.0", features = [], optional = true }
+async-trait = { version = "0.1.86", optional = true }
 
 [features]
 default = ["serialize", "multithreading-cli"]
 store = []
-signing = []
+async = ["tokio", "async-trait", "redis/tokio-comp"]
+store-redis = ["store", "redis"]
+store-skytable = ["store"]
+store-postgres = ["store"]
+signing = ["store"]
 serialize = ["bitcode", "base64"]
 multithreading-cli = ["rayon"]
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
 
 [[bin]]
 name = "pow-captcha-cli"

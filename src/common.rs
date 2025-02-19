@@ -20,7 +20,7 @@ pub enum CaptchaType {
 #[derive(bitcode::Encode, bitcode::Decode)]
 // Token and signature are always here since the client should be portable
 pub struct CaptchaClientInfo {
-    pub tokensignature: TokenSignature,
+    pub token_signature: TokenSignature,
     pub hash: String,
     pub salt: String,
     pub captcha_type: CaptchaType,
@@ -34,7 +34,7 @@ pub struct CaptchaClientInfo {
 pub enum TokenSignature{
     Neither,
     Token(String),
-    Signature(String)
+    TokenSignature((String, String))
 }
 
 #[derive(Debug)]

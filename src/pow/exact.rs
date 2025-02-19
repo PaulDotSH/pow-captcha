@@ -1,16 +1,23 @@
+use base64::Engine;
+use base64::prelude::BASE64_STANDARD;
 use bcrypt::BcryptError;
-use rand::{thread_rng, Rng};
-use crate::common::CaptchaAnswer;
+use rand::{rng, Rng};
+use crate::common;
+use crate::common::{CaptchaAnswer, CaptchaClientInfo, CaptchaServerInfo};
+use crate::pow::common::generate_token;
 use super::{CaptchaInput, PoWCommon};
+#[cfg(feature = "serialize")]
+use super::DeserializeError;
+
 
 pub trait PoWImpl {
     fn generate_captcha(&self) -> Result<CaptchaAnswer, BcryptError> {
-        let mut rng = thread_rng();
+        let mut rng = rng();
         let salt: String = (0..self.salt_size())
-            .map(|_| rng.gen_range(b'a'..=b'z') as char)
+            .map(|_| rng.random_range(b'a'..=b'z') as char)
             .collect();
     
-        let nonce: u64 = rng.gen_range(0..self.common().challenge_size);
+        let nonce: u64 = rng.random_range(0..self.common().challenge_size);
         let nonce_str = nonce.to_string();
     
         let to_hash = format!("{}{}", salt, nonce_str);
@@ -39,12 +46,12 @@ pub trait PoWImpl {
 
         #[cfg(feature = "store")]
         {
-            ts = TokenSignature::Token();
+            ts = TokenSignature::Token(generate_token(self.common().token_size));
         }
 
         #[cfg(feature = "signing")]
         {
-            ts = TokenSignature::Signature();
+            ts = TokenSignature::TokenSignature((generate_token(self.common().token_size), String::from("signature todo")));
         }
 
         let info = CaptchaClientInfo {
@@ -53,7 +60,7 @@ pub trait PoWImpl {
             captcha_type: CaptchaType::Exact,
             size: self.common().challenge_size as usize,
             cost: self.common().cost,
-            tokensignature: ts,
+            token_signature: ts,
         };
 
         let encoded: Vec<u8> = bitcode::encode(&info);
@@ -61,6 +68,27 @@ pub trait PoWImpl {
         Ok((base64::prelude::BASE64_STANDARD.encode(encoded), captcha))
     }
 
+    #[cfg(feature = "serialize")]
+    fn deserialize_captcha_info(&self, string: &str) -> Result<CaptchaServerInfo, DeserializeError> {
+        let decoded_b64 = match BASE64_STANDARD.decode(string) {
+            Ok(decoded) => decoded,
+            Err(e) => {
+                return Err(DeserializeError::Base64Error(e));
+            }
+        };
+
+        let captcha_info: CaptchaServerInfo = match bitcode::decode::<CaptchaServerInfo>(&decoded_b64) {
+            Ok(decoded) => decoded,
+            Err(e) => {
+                return Err(DeserializeError::BitcodeError(e));
+            }
+        };
+
+        Ok(captcha_info)
+    }
+
+
+    #[cfg(feature = "store")]
     fn common(&self) -> &PoWCommon;
     fn salt_size(&self) -> u16;
 }
@@ -79,6 +107,8 @@ pub struct PoW {
 }
 
 #[cfg(feature = "store")]
+#[cfg(feature = "async")]
+#[async_trait::async_trait]
 impl<T: crate::store::Store> PoWImpl for PoW<T> {
     fn common(&self) -> &PoWCommon {
         &self.common
@@ -101,11 +131,16 @@ impl PoWImpl for PoW {
 #[cfg(feature = "store")]
 impl<T: crate::store::Store> crate::pow::PoW<T> for PoW<T> {
     fn generate_captcha(&self) -> Result<CaptchaAnswer, BcryptError> {
-        PoWImpl::generate_captcha(self)
+        let captcha = PoWImpl::generate_captcha(self)?;
     }
 
     fn validate_captcha(&self, input: CaptchaInput) -> bool {
         PoWImpl::validate_captcha(self, input)
+    }
+
+    #[cfg(feature = "serialize")]
+    fn deserialize_captcha_server_info(&self, string: &str) -> Result<CaptchaServerInfo, DeserializeError> {
+        PoWImpl::deserialize_captcha_info(self, string)
     }
 
     #[cfg(feature = "serialize")]
